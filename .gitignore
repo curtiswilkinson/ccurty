@@ -1,0 +1,3 @@
+*.dSYM
+tests
+math_tests
