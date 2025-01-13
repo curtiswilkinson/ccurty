@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <assert.h>
 #include "./ccurty.h"
 
 
@@ -373,8 +372,8 @@ void test_string_builder(void) {
 
   test("sb_insert") {
     StringBuilder sb = {0};
-    sb_append(&sb, "hllo");
 
+    sb_append(&sb, "hllo");
     sb_insert(&sb, 'e', 1);
 
     expect(strcmp(sb.items, "hello") == 0);
@@ -384,8 +383,8 @@ void test_string_builder(void) {
 
   test("sb_insert_n") {
     StringBuilder sb = {0};
-    sb_append(&sb, "hlo");
 
+    sb_append(&sb, "hlo");
     sb_insert_n(&sb, "el", 2, 1);
 
     expect(strcmp(sb.items, "hello") == 0);
@@ -397,11 +396,9 @@ void test_string_builder(void) {
 
 int main(void) {
     test_time_start();
-
     test_arrays();
     test_hashtable();
     test_string_builder();
-
     test_time_end();
 
     return 0;
