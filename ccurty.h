@@ -47,7 +47,7 @@
 
 #define d_append_n(arr, new_items, new_items_count)                       \
   do {                                                                    \
-    if ((arr)->count + new_items_count >= (arr)->capacity) {              \
+    if ((arr)->count + new_items_count > (arr)->capacity) {              \
       size_t capacity = (arr)->capacity == 0 ? 256 : (arr)->capacity * 2; \
       d_ensure(arr, capacity);                                            \
     }                                                                     \
@@ -83,14 +83,15 @@
 
 #define d_insert_n(arr, arr2, insert_count, index)                            \
   do {                                                                        \
-    if ((arr)->capacity + insert_count >= (arr)->capacity) {                  \
+    if ((arr)->count + insert_count > (arr)->capacity) {                  \
       size_t capacity = (arr)->capacity == 0                                  \
         ? 256                                                                 \
         : (arr)->capacity + insert_count * 2;                                 \
       d_ensure(arr, capacity);                                                \
     }                                                                         \
     size_t size = insert_count * sizeof((arr)->items[0]);                     \
-    memmove((arr)->items + index + insert_count, (arr)->items + index, size); \
+    size_t move_size = ((arr)->count - index) * sizeof((arr)->items[0]);      \
+    memmove((arr)->items + index + insert_count, (arr)->items + index, move_size); \
     memcpy((arr)->items + index, arr2, size); \
     (arr)->count += insert_count; \
   } while (0)
@@ -164,12 +165,13 @@ void hashtable_free(HashTable *table) {
 // TODO handle overflow
 void hashtable_insert(HashTable *table, char *key, size_t size, void* value) {
   size_t h = hash(key, size)%table->capacity;
+  size_t original_h = h;
 
   while (table->items[h].key != NULL && strcmp(table->items[h].key , key)) {
-    if (h == table->capacity) {
+    h = (h + 1) % table->capacity;
+    if (h == original_h) {
       unimplemented("HashTable overflow");
     }
-    h++;
   }
 
   table->items[h] = (HashKV) {
@@ -183,12 +185,13 @@ void *hashtable_get(HashTable *table, char *key, size_t size) {
   if (key == NULL) return NULL;
 
   size_t h = hash(key, size)%table->capacity;
+  size_t original_h = h;
 
   if (table->items[h].key == NULL) return NULL;
 
   while (strcmp(table->items[h].key, key) != 0) {
-    if (h == table->capacity) return NULL;
-    h++;
+    h = (h + 1) % table->capacity;
+    if (h == original_h || table->items[h].key == NULL) return NULL;
   }
 
   return table->items[h].value;
@@ -198,12 +201,13 @@ bool hashtable_delete(HashTable *table, char *key, size_t size) {
   if (key == NULL) return false;
 
   size_t h = hash(key, size)%table->capacity;
+  size_t original_h = h;
 
   if (table->items[h].key == NULL) return false;
 
   while (strcmp(table->items[h].key, key) != 0) {
-    if (h == table->capacity) return false;
-    h++;
+    h = (h + 1) % table->capacity;
+    if (h == original_h || table->items[h].key == NULL) return false;
   }
 
   table->items[h].key = NULL;
