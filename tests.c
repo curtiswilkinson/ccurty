@@ -241,7 +241,7 @@ void test_hashtable(void) {
 
     int result = (intptr_t)hashtable_get(&table, key, strlen(key));
     int result2= (intptr_t)hashtable_get(&table, key2, strlen(key2));
-    void *maybe_result = hashtable_get(&table, "l", true);
+    void *maybe_result = hashtable_get(&table, "l", strlen("l"));
 
     hashtable_free(&table);
 
@@ -350,6 +350,7 @@ void test_string_builder(void) {
   test("sb_append") {
     StringBuilder sb = {0};
     sb_append(&sb, "test");
+    sb_append_null(&sb);
 
     expect(strcmp(sb.items, "test") == 0);
 
@@ -364,6 +365,7 @@ void test_string_builder(void) {
     sb_append(&sb2, "world!");
 
     sb_concat(&sb, &sb2);
+    sb_append_null(&sb);
 
     expect(strcmp(sb.items, "hello world!") == 0);
 
@@ -376,6 +378,7 @@ void test_string_builder(void) {
     sb_append(&sb, "hllo");
 
     sb_insert(&sb, 'e', 1);
+    sb_append_null(&sb);
 
     expect(strcmp(sb.items, "hello") == 0);
 
@@ -387,6 +390,7 @@ void test_string_builder(void) {
     sb_append(&sb, "hlo");
 
     sb_insert_n(&sb, "el", 2, 1);
+    sb_append_null(&sb);
 
     expect(strcmp(sb.items, "hello") == 0);
 
